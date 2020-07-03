@@ -112,6 +112,46 @@ class LevelMeteor(arcade.View):
         self.is_ball_collide()
         self.ball.on_update()
 
+    def check_if_ball_collide_meteors(self):
+        temp = self.ball.collides_with_list(self.meteors)
+        if len(temp) > 0:
+            self.ball.direction_movement_y *= -1
+            self.ball.direction_movement_x *= -1
+            self.ball.on_update()
+
+    def check_if_ball_collide_vertical_walls(self):
+        # player 2 won
+        temp = self.ball.collides_with_list(self.right_wall)
+        if len(temp) > 0:
+            self.player_2_score += self.counter_ball_is_speeding
+            self.counter_ball_is_speeding = 1
+            self.ball.reset()
+            self.ball.on_update()
+
+        # player 1 won
+        temp = self.ball.collides_with_list(self.left_wall)
+        if len(temp) > 0:
+            self.player_1_score += self.counter_ball_is_speeding
+            self.counter_ball_is_speeding = 1
+            self.ball.reset()
+            self.ball.on_update()
+
+    def check_if_ball_collide_horizontal_walls(self):
+        temp = self.ball.collides_with_list(self.up_and_down)
+        if len(temp) > 0:
+            self.ball.direction_movement_y *= -1
+            self.ball.on_update()
+
+    def check_if_ball_collide_paddles(self):
+        temp = self.ball.collides_with_list(self.paddles)
+        if len(temp) > 0:  # if ball is collide the paddle
+            self.ball_collide_with_paddle(temp[0])
+            if self.ball.is_speeding:
+                self.counter_ball_is_speeding += 1
+            else:
+                self.counter_ball_is_speeding = 1
+            self.ball.on_update()
+
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.ESCAPE:
             self.window.show_view(self.go_back_view)
@@ -126,11 +166,17 @@ class LevelMeteor(arcade.View):
     def players_collide_borders(self):
         temp = arcade.check_for_collision_with_list(self.left_player, self.up_and_down)
         if len(temp) > 0:
-            self.left_player.direction_movement_y *= -1
+            if temp[0].center_y > init.window_height / 2:  # check if this is the upper box
+                self.left_player.center_y = init.window_height - init.box_image_height - init.paddle_pixel_buffer - init.paddle_image_height / 2
+            else:
+                self.left_player.center_y = 0 + init.box_image_height + init.paddle_pixel_buffer + init.paddle_image_height / 2
 
         temp = arcade.check_for_collision_with_list(self.right_player, self.up_and_down)
         if len(temp) > 0:
-            self.right_player.direction_movement_y *= -1
+            if temp[0].center_y > init.window_height / 2:  # check if this is the upper box
+                self.right_player.center_y = init.window_height - init.box_image_height - init.paddle_pixel_buffer - init.paddle_image_height / 2
+            else:
+                self.right_player.center_y = 0 + init.box_image_height + init.paddle_pixel_buffer + init.paddle_image_height / 2
 
     def is_meteors_collide_borders(self):
 
@@ -148,39 +194,13 @@ class LevelMeteor(arcade.View):
 
     def is_ball_collide(self):
 
-        # meteors
-        temp = self.ball.collides_with_list(self.meteors)
-        if len(temp) > 0:
-            self.ball.direction_movement_y *= -1
-            self.ball.direction_movement_x *= -1
+        self.check_if_ball_collide_meteors()
 
-        # player 2 won
-        temp = self.ball.collides_with_list(self.right_wall)
-        if len(temp) > 0:
-            self.player_2_score += self.counter_ball_is_speeding
-            self.counter_ball_is_speeding = 1
-            self.ball.reset()
+        self.check_if_ball_collide_vertical_walls()
 
-        # player 1 won
-        temp = self.ball.collides_with_list(self.left_wall)
-        if len(temp) > 0:
-            self.player_1_score += self.counter_ball_is_speeding
-            self.counter_ball_is_speeding = 1
-            self.ball.reset()
+        self.check_if_ball_collide_horizontal_walls()
 
-        # ball bounce the wall
-        temp = self.ball.collides_with_list(self.up_and_down)
-        if len(temp) > 0:
-            self.ball.direction_movement_y *= -1
-
-        # ball collide the paddle
-        temp = self.ball.collides_with_list(self.paddles)
-        if len(temp) > 0:
-            self.ball_collide_with_paddle(temp[0])
-            if self.ball.is_speeding:
-                self.counter_ball_is_speeding += 1
-            else:
-                self.counter_ball_is_speeding = 1
+        self.check_if_ball_collide_paddles()
 
     def ball_collide_with_paddle(self, paddle):
         self.ball.direction_movement_x *= -1
@@ -188,12 +208,10 @@ class LevelMeteor(arcade.View):
         if paddle.is_pushing:
             self.ball.direction_movement_y = 0
             self.ball.is_speeding = True
-
             paddle.is_returning = True
             paddle.is_pushing = False
             paddle.direction_movement_x *= -1
         elif not paddle.is_moving and self.ball.direction_movement_y == 0:
-            self.ball.center_x += self.ball.max_speed * self.ball.direction_movement_x
             self.ball.direction_movement_y = 0
             self.ball.is_speeding = False
         elif paddle.is_moving:
@@ -201,8 +219,6 @@ class LevelMeteor(arcade.View):
             self.ball.is_speeding = False
             if paddle.is_speeding:
                 self.ball.is_speeding = True
-            else:
-                self.ball.center_x += self.ball.max_speed * self.ball.direction_movement_x
 
     def setup(self):
         self.player_1_score = 0

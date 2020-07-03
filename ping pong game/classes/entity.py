@@ -7,8 +7,6 @@ class Entity(arcade.Sprite):
         super().__init__(filename=image, scale=scale)
         self.center_x = center_x
         self.center_y = center_y
-        self.width = width
-        self.height = height
         self.speed_x = speed_x
         self.speed_y = speed_y
         self.direction_movement_x = direction_movement_x

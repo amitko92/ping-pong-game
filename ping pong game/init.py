@@ -41,15 +41,15 @@ paddle_left_key_push = 100
 
 # ball:
 ball_image = ":resources:images/pinball/pool_cue_ball.png"
-ball_scale = 1
+ball_scale = 0.5
 ball_center_x = window_width / 2
 ball_center_y = window_height / 2
 ball_speed = 5
 max_ball_speed = ball_speed*2 + 2
 ball_direction_movement_x = 1
 ball_direction_movement_y = 1
-ball_image_width = 64
-ball_image_height = 64
+ball_image_width = 34
+ball_image_height = 34
 
 # meteor:
 meteor_image = ":resources:images/space_shooter/meteorGrey_big3.png"
